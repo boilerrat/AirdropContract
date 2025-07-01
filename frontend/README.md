@@ -1,89 +1,146 @@
 # Airdrop Manager - Farcaster Mini App
 
-A modern, user-friendly Farcaster Mini App for managing token airdrops on Base mainnet. Built with Next.js, TypeScript, and the Farcaster Mini App SDK.
+A Farcaster Mini App for managing token airdrops on Base mainnet. Built with Next.js, TypeScript, and Tailwind CSS.
 
 ## Features
 
-- **Batch Airdrops**: Execute airdrops to multiple recipients with individual or same amounts
-- **Farcaster Integration**: Native Farcaster Mini App with seamless wallet connection
-- **Real-time Validation**: Live validation of addresses, amounts, and contract state
-- **Contract Status**: View contract information, balances, and authorization status
-- **Modern UI**: Beautiful, responsive design with smooth animations
-- **Base Mainnet**: Optimized for Base network with verified contract
-
-## Tech Stack
-
-- **Framework**: Next.js 14 with App Router
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **Web3**: Wagmi + Viem
-- **Farcaster**: Mini App SDK
-- **UI Components**: Custom components with Lucide React icons
-- **State Management**: React Query for data fetching
+- 🚀 **CSV Upload**: Upload recipient addresses via CSV files
+- 💰 **Batch Airdrops**: Execute airdrops to multiple recipients
+- 🔗 **Wallet Integration**: Seamless wallet connection with Reown AppKit
+- 📱 **Farcaster Ready**: Optimized for Farcaster Mini App ecosystem
+- 🎨 **Modern UI**: Beautiful, responsive interface with Tailwind CSS
 
 ## Quick Start
 
-1. **Install Dependencies**
+### Prerequisites
+
+- Node.js 18+ 
+- npm or yarn
+- WalletConnect Project ID from [Reown Cloud](https://cloud.reown.com)
+
+### Local Development
+
+1. **Clone and install dependencies**
    ```bash
    cd frontend
    npm install
    ```
 
-2. **Environment Setup**
-   Create a `.env.local` file:
+2. **Set up environment variables**
+   ```bash
+   cp env.example .env.local
+   ```
+   
+   Edit `.env.local` and add your WalletConnect Project ID:
    ```env
-   NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_walletconnect_project_id
+   NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_project_id_here
    ```
 
-3. **Run Development Server**
+3. **Run the development server**
    ```bash
    npm run dev
    ```
 
-4. **Open in Browser**
-   Navigate to `http://localhost:3000`
+4. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
 
-## Project Structure
+## Deployment to Vercel
 
+### 1. Prepare Your Repository
+
+Make sure your code is pushed to a Git repository (GitHub, GitLab, or Bitbucket).
+
+### 2. Set Up Vercel Project
+
+1. Go to [vercel.com](https://vercel.com) and sign in
+2. Click "New Project"
+3. Import your Git repository
+4. Configure the project settings:
+   - **Framework Preset**: Next.js
+   - **Root Directory**: `frontend` (if your frontend is in a subdirectory)
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `.next`
+
+### 3. Configure Environment Variables
+
+In your Vercel project dashboard:
+
+1. Go to **Settings** → **Environment Variables**
+2. Add the following variables:
+   ```
+   NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_actual_project_id
+   ```
+
+### 4. Deploy
+
+1. Click **Deploy**
+2. Vercel will automatically build and deploy your app
+3. Your app will be available at `https://your-project.vercel.app`
+
+### 5. Update Farcaster Manifest
+
+After deployment, update the manifest URLs in `app/api/farcaster-manifest/route.ts`:
+
+```typescript
+iconUrl: "https://your-actual-domain.vercel.app/icon.png",
+homeUrl: "https://your-actual-domain.vercel.app",
+postUrl: "https://your-actual-domain.vercel.app/api/frame",
 ```
-frontend/
-├── app/                    # Next.js App Router
-├── components/            # React components
-├── hooks/                # Custom React hooks
-├── lib/                  # Utility libraries
-├── .well-known/          # Farcaster manifest
-└── public/               # Static assets
+
+### 6. Register with Farcaster
+
+1. Visit [Farcaster Mini Apps](https://miniapps.farcaster.xyz)
+2. Use the manifest tool to register your app
+3. Add your deployed domain to the manifest
+
+## CSV Upload Format
+
+The app supports two CSV formats:
+
+### Simple Address List
+```csv
+address
+0x1234567890123456789012345678901234567890
+0x0987654321098765432109876543210987654321
 ```
 
-## Usage
+### Address + Amount List
+```csv
+address,amount
+0x1234567890123456789012345678901234567890,1.5
+0x0987654321098765432109876543210987654321,2.0
+```
 
-1. **Connect Wallet**: Click "Connect Wallet" to connect your Ethereum wallet
-2. **Enter Token Address**: Paste the ERC20 token contract address
-3. **Choose Airdrop Type**: Select "Same Amount" or "Individual Amounts"
-4. **Add Recipients**: Enter recipient addresses (one per line)
-5. **Set Amounts**: Enter the amount(s) to airdrop
-6. **Review & Execute**: Review the summary and execute the airdrop
+## Smart Contract
 
-## Deployment
+This app interacts with an airdrop smart contract deployed on Base mainnet. The contract supports:
 
-### Vercel (Recommended)
+- Batch airdrops to multiple recipients
+- Same amount or individual amounts per recipient
+- ERC20 token transfers
+- Owner withdrawal functionality
 
-1. Connect your GitHub repository to Vercel
-2. Set environment variables
-3. Deploy automatically on push to main
+## Tech Stack
 
-### Manual Deployment
+- **Frontend**: Next.js 14, React 18, TypeScript
+- **Styling**: Tailwind CSS
+- **Wallet**: Reown AppKit (WalletConnect v3)
+- **Blockchain**: Viem, Wagmi v2
+- **Network**: Base mainnet
+- **Deployment**: Vercel
 
-1. Build: `npm run build`
-2. Start: `npm start`
-3. Upload to your hosting provider
+## Contributing
 
-## Farcaster Mini App Features
-
-- **Native Integration**: Seamless integration with Farcaster client
-- **Wallet Connection**: Automatic wallet connection in Farcaster environment
-- **Social Discovery**: App appears in Farcaster search and directories
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
 ## License
 
-MIT License 
+MIT License - see LICENSE file for details.
+
+## Support
+
+For support, please open an issue on GitHub or reach out to the Farcaster community. 
