@@ -1,4 +1,4 @@
-import { useContractRead, useContractWrite, useTransactionReceipt } from 'wagmi';
+import { useContractRead, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { CONTRACT_CONFIG, ERC20_ABI } from '@/lib/contracts';
 import { stringToBigInt, bigIntToString } from '@/lib/utils';
 
@@ -36,7 +36,6 @@ export function useIsAuthorizedOperator(address: string) {
     ...CONTRACT_CONFIG,
     functionName: 'isAuthorizedOperator',
     args: [address as `0x${string}`],
-    enabled: !!address,
   });
 
   return isAuthorized || false;
@@ -50,7 +49,6 @@ export function useContractTokenBalance(tokenAddress: string) {
     ...CONTRACT_CONFIG,
     functionName: 'getTokenBalance',
     args: [tokenAddress as `0x${string}`],
-    enabled: !!tokenAddress,
   });
 
   return balance || BigInt(0);
@@ -60,13 +58,9 @@ export function useContractTokenBalance(tokenAddress: string) {
  * Hook for airdropping same amount to multiple recipients
  */
 export function useAirdropSameAmount() {
-  const { data, write, isLoading, error } = useContractWrite({
-    ...CONTRACT_CONFIG,
-    functionName: 'airdropSameAmount',
-  });
-
-  const { isLoading: isConfirming, isSuccess } = useTransactionReceipt({
-    hash: data?.hash,
+  const { data, isPending, isSuccess, error, writeContract } = useWriteContract();
+  const { isLoading: isConfirming } = useWaitForTransactionReceipt({
+    hash: data,
   });
 
   const executeAirdrop = (
@@ -75,10 +69,11 @@ export function useAirdropSameAmount() {
     amount: string,
     decimals: number = 18
   ) => {
-    if (!write) return;
-    
+    if (!writeContract) return;
     const amountBigInt = stringToBigInt(amount, decimals);
-    write({
+    writeContract({
+      ...CONTRACT_CONFIG,
+      functionName: 'airdropSameAmount',
       args: [
         tokenAddress as `0x${string}`,
         recipients as `0x${string}`[],
@@ -89,10 +84,10 @@ export function useAirdropSameAmount() {
 
   return {
     executeAirdrop,
-    isLoading: isLoading || isConfirming,
+    isLoading: isPending || isConfirming,
     isSuccess,
     error,
-    hash: data?.hash,
+    txHash: data,
   };
 }
 
@@ -100,13 +95,9 @@ export function useAirdropSameAmount() {
  * Hook for airdropping individual amounts to recipients
  */
 export function useAirdropIndividualAmounts() {
-  const { data, write, isLoading, error } = useContractWrite({
-    ...CONTRACT_CONFIG,
-    functionName: 'airdropIndividualAmounts',
-  });
-
-  const { isLoading: isConfirming, isSuccess } = useTransactionReceipt({
-    hash: data?.hash,
+  const { data, isPending, isSuccess, error, writeContract } = useWriteContract();
+  const { isLoading: isConfirming } = useWaitForTransactionReceipt({
+    hash: data,
   });
 
   const executeAirdrop = (
@@ -115,10 +106,11 @@ export function useAirdropIndividualAmounts() {
     amounts: string[],
     decimals: number = 18
   ) => {
-    if (!write) return;
-    
+    if (!writeContract) return;
     const amountsBigInt = amounts.map(amount => stringToBigInt(amount, decimals));
-    write({
+    writeContract({
+      ...CONTRACT_CONFIG,
+      functionName: 'airdropIndividualAmounts',
       args: [
         tokenAddress as `0x${string}`,
         recipients as `0x${string}`[],
@@ -129,10 +121,10 @@ export function useAirdropIndividualAmounts() {
 
   return {
     executeAirdrop,
-    isLoading: isLoading || isConfirming,
+    isLoading: isPending || isConfirming,
     isSuccess,
     error,
-    hash: data?.hash,
+    txHash: data,
   };
 }
 
@@ -140,13 +132,9 @@ export function useAirdropIndividualAmounts() {
  * Hook for withdrawing tokens (owner only)
  */
 export function useWithdrawTokens() {
-  const { data, write, isLoading, error } = useContractWrite({
-    ...CONTRACT_CONFIG,
-    functionName: 'withdrawTokens',
-  });
-
-  const { isLoading: isConfirming, isSuccess } = useTransactionReceipt({
-    hash: data?.hash,
+  const { data, isPending, isSuccess, error, writeContract } = useWriteContract();
+  const { isLoading: isConfirming } = useWaitForTransactionReceipt({
+    hash: data,
   });
 
   const executeWithdraw = (
@@ -154,20 +142,21 @@ export function useWithdrawTokens() {
     amount: string,
     decimals: number = 18
   ) => {
-    if (!write) return;
-    
+    if (!writeContract) return;
     const amountBigInt = stringToBigInt(amount, decimals);
-    write({
+    writeContract({
+      ...CONTRACT_CONFIG,
+      functionName: 'withdrawTokens',
       args: [tokenAddress as `0x${string}`, amountBigInt],
     });
   };
 
   return {
     executeWithdraw,
-    isLoading: isLoading || isConfirming,
+    isLoading: isPending || isConfirming,
     isSuccess,
     error,
-    hash: data?.hash,
+    txHash: data,
   };
 }
 
@@ -179,21 +168,18 @@ export function useTokenInfo(tokenAddress: string) {
     address: tokenAddress as `0x${string}`,
     abi: ERC20_ABI,
     functionName: 'name',
-    enabled: !!tokenAddress,
   });
 
   const { data: symbol } = useContractRead({
     address: tokenAddress as `0x${string}`,
     abi: ERC20_ABI,
     functionName: 'symbol',
-    enabled: !!tokenAddress,
   });
 
   const { data: decimals } = useContractRead({
     address: tokenAddress as `0x${string}`,
     abi: ERC20_ABI,
     functionName: 'decimals',
-    enabled: !!tokenAddress,
   });
 
   return {

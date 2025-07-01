@@ -1,22 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  webpack: (config, { isServer }) => {
-    // Handle worker files
-    config.module.rules.push({
-      test: /\.worker\.js$/,
-      type: 'asset/resource',
-    });
-    
-    // Ignore problematic files
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      fs: false,
-      net: false,
-      tls: false,
-    };
-    
+  // Disable webpack optimizations that might cause issues
+  swcMinify: false,
+  
+  // Handle externals
+  webpack: (config) => {
+    config.externals = config.externals || [];
+    config.externals.push('pino-pretty', 'lokijs', 'encoding');
     return config;
   },
+  
   async headers() {
     return [
       {
