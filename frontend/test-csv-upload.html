@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Upload Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .result {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>CSV Upload Functionality Test</h1>
+    
+    <div class="test-section">
+        <h2>Test CSV Parsing</h2>
+        <p>This tests the CSV parsing functionality that will be used in the frontend.</p>
+        
+        <button onclick="testCSVParsing()">Test CSV Parsing</button>
+        
+        <div id="csv-result" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Sample CSV Files</h2>
+        <p>Download these sample CSV files to test the upload functionality:</p>
+        
+        <button onclick="downloadSampleCSV()">Download Sample CSV</button>
+        <button onclick="downloadSampleCSVWithAmounts()">Download CSV with Amounts</button>
+    </div>
+
+    <script>
+        // CSV parsing function (simplified version of what's in utils.ts)
+        function parseCSV(csvContent) {
+            const lines = csvContent.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+            
+            if (lines.length === 0) {
+                return { addresses: [] };
+            }
+
+            // Check if first line contains headers
+            const firstLine = lines[0].toLowerCase();
+            const hasHeaders = firstLine.includes('address') || firstLine.includes('amount') || firstLine.includes('wallet');
+            
+            const dataLines = hasHeaders ? lines.slice(1) : lines;
+            
+            const addresses = [];
+            const amounts = [];
+            
+            dataLines.forEach(line => {
+                const columns = line.split(',').map(col => col.trim().replace(/"/g, ''));
+                
+                if (columns.length >= 1) {
+                    const address = columns[0];
+                    if (/^0x[a-fA-F0-9]{40}$/.test(address)) {
+                        addresses.push(address);
+                        
+                        // If there's a second column and it looks like an amount
+                        if (columns.length >= 2) {
+                            const amount = columns[1];
+                            if (!isNaN(parseFloat(amount)) && parseFloat(amount) > 0) {
+                                amounts.push(amount);
+                            } else {
+                                amounts.push('');
+                            }
+                        }
+                    }
+                }
+            });
+            
+            return {
+                addresses,
+                amounts: amounts.length > 0 ? amounts : undefined
+            };
+        }
+
+        function testCSVParsing() {
+            const testCSV = `address,amount
+0x1234567890123456789012345678901234567890,1.5
+0x0987654321098765432109876543210987654321,2.0
+0xabcdef1234567890abcdef1234567890abcdef,0.5
+invalid-address,1.0
+0x1111111111111111111111111111111111111111,`;
+
+            const result = parseCSV(testCSV);
+            
+            const resultDiv = document.getElementById('csv-result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = `
+                <h3>Parsing Results:</h3>
+                <p><strong>Valid Addresses Found:</strong> ${result.addresses.length}</p>
+                <p><strong>Addresses:</strong></p>
+                <ul>
+                    ${result.addresses.map(addr => `<li>${addr}</li>`).join('')}
+                </ul>
+                ${result.amounts ? `
+                <p><strong>Amounts:</strong></p>
+                <ul>
+                    ${result.amounts.map(amount => `<li>${amount || 'N/A'}</li>`).join('')}
+                </ul>
+                ` : ''}
+            `;
+        }
+
+        function downloadSampleCSV() {
+            const csv = `address
+0x1234567890123456789012345678901234567890
+0x0987654321098765432109876543210987654321
+0xabcdef1234567890abcdef1234567890abcdef
+0x1111111111111111111111111111111111111111`;
+            
+            downloadCSV(csv, 'sample_recipients.csv');
+        }
+
+        function downloadSampleCSVWithAmounts() {
+            const csv = `address,amount
+0x1234567890123456789012345678901234567890,1.5
+0x0987654321098765432109876543210987654321,2.0
+0xabcdef1234567890abcdef1234567890abcdef,0.5
+0x1111111111111111111111111111111111111111,1.0`;
+            
+            downloadCSV(csv, 'sample_recipients_with_amounts.csv');
+        }
+
+        function downloadCSV(content, filename) {
+            const blob = new Blob([content], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html> 

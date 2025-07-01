@@ -1,0 +1,18 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjM2MjEsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHgyY2Q4NWEwOTMyNjFmNTkyNzA4MDRBNkVBNjk3Q2VBNENlQkVjYWZFIn0",
+    "payload": "eyJkb21haW4iOiJhaXJkcm9wLW1pbmktYXBwLmNvbSJ9",
+    "signature": "MHgwZmJiYWIwODg3YTU2MDFiNDU3MzVkOTQ5MDRjM2Y1NGUxMzVhZTQxOGEzMWQ5ODNhODAzZmZlYWNlZWMyZDYzNWY4ZTFjYWU4M2NhNTAwOTMzM2FmMTc1NDlmMDY2YTVlOWUwNTljNmZiNDUxMzg0Njk1NzBhODNiNjcyZWJjZTFi"
+  },
+  "frame": {
+    "version": "1",
+    "name": "Airdrop Manager",
+    "iconUrl": "https://airdrop-mini-app.com/icon.png",
+    "homeUrl": "https://airdrop-mini-app.com",
+    "imageUrl": "https://airdrop-mini-app.com/opengraph-image",
+    "buttonTitle": "🚀 Manage Airdrops",
+    "splashImageUrl": "https://airdrop-mini-app.com/logo.png",
+    "splashBackgroundColor": "#0ea5e9",
+    "webhookUrl": "https://airdrop-mini-app.com/api/webhook"
+  }
+} 
