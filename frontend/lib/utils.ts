@@ -44,6 +44,24 @@ export function isValidAddress(address: string): boolean {
 }
 
 /**
+ * Validate ENS name format
+ */
+export function isValidENSName(name: string): boolean {
+  // Basic ENS validation - alphanumeric, hyphens, dots
+  // Must end with .eth and be at least 3 characters before the .eth
+  return /^[a-zA-Z0-9-]+\.eth$/.test(name) && name.length >= 7;
+}
+
+/**
+ * Check if a string looks like an ENS name or Ethereum address
+ */
+export function isENSOrAddress(input: string): 'ens' | 'address' | 'invalid' {
+  if (isValidENSName(input)) return 'ens';
+  if (isValidAddress(input)) return 'address';
+  return 'invalid';
+}
+
+/**
  * Validate token amount (positive number)
  */
 export function isValidAmount(amount: string): boolean {
@@ -53,12 +71,13 @@ export function isValidAmount(amount: string): boolean {
 
 /**
  * Parse recipients from text input (one per line)
+ * Note: This function only validates format, ENS resolution happens in components
  */
 export function parseRecipients(input: string): string[] {
   return input
     .split('\n')
     .map(line => line.trim())
-    .filter(line => line.length > 0 && isValidAddress(line));
+    .filter(line => line.length > 0 && (isValidAddress(line) || isValidENSName(line)));
 }
 
 /**

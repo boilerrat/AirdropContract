@@ -6,15 +6,17 @@ import { AirdropForm } from '@/components/AirdropForm';
 import { ContractStatus } from '@/components/ContractStatus';
 import { Button } from '@/components/ui/Button';
 import { WalletDebug } from '@/components/WalletDebug';
+import { WalletDisplay } from '@/components/WalletDisplay';
+import { ENSDemo } from '@/components/ENSDemo';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { formatAddress } from '@/lib/utils';
 import { 
-  Wallet, 
   Users, 
   Coins, 
   Shield, 
   Sparkles,
-  ExternalLink 
+  ExternalLink,
+  Globe
 } from 'lucide-react';
 
 console.log('WalletConnect Project ID:', process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID);
@@ -24,7 +26,7 @@ console.log('Current URL:', typeof window !== 'undefined' ? window.location.href
 export default function HomePage() {
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
-  const [activeTab, setActiveTab] = useState<'airdrop' | 'status'>('airdrop');
+  const [activeTab, setActiveTab] = useState<'airdrop' | 'status' | 'ens'>('airdrop');
 
   const handleDisconnect = () => {
     try {
@@ -73,12 +75,7 @@ export default function HomePage() {
             <div className="flex items-center gap-3">
               {isConnected ? (
                 <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg">
-                    <Wallet className="h-4 w-4 text-gray-600" />
-                    <span className="text-sm font-mono text-gray-700">
-                      {formatAddress(address || '', 6)}
-                    </span>
-                  </div>
+                  <WalletDisplay />
                   <Button
                     variant="outline"
                     size="sm"
@@ -138,10 +135,21 @@ export default function HomePage() {
               <Shield className="h-4 w-4 inline mr-2" />
               Contract Status
             </button>
+            <button
+              onClick={() => setActiveTab('ens')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'ens'
+                  ? 'bg-white text-primary-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <Globe className="h-4 w-4 inline mr-2" />
+              ENS Demo
+            </button>
           </div>
         </div>
 
-        {/* Tab Content */}
+                {/* Tab Content */}
         <div className="space-y-8">
           {activeTab === 'airdrop' ? (
             <div className="space-y-8">
@@ -193,8 +201,10 @@ export default function HomePage() {
               {/* Airdrop Form */}
               <AirdropForm userAddress={address} />
             </div>
-          ) : (
+          ) : activeTab === 'status' ? (
             <ContractStatus userAddress={address} />
+          ) : (
+            <ENSDemo />
           )}
         </div>
 

@@ -6,7 +6,10 @@ import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { CSVUpload } from '@/components/CSVUpload';
+import { ENSAddressInput } from '@/components/ENSAddressInput';
+import { RecipientsList } from '@/components/RecipientDisplay';
 import { useAirdropSameAmount, useAirdropIndividualAmounts, useTokenInfo, useContractTokenBalance } from '@/hooks/useContract';
+import { useMultipleENSResolution } from '@/hooks/useENSResolution';
 import { parseRecipients, parseAmounts, formatNumber, isValidAddress, isValidAmount } from '@/lib/utils';
 import { Users, Coins, AlertCircle, CheckCircle, Copy, Upload } from 'lucide-react';
 
@@ -32,7 +35,11 @@ export function AirdropForm({ userAddress }: AirdropFormProps) {
   const { name: tokenName, symbol: tokenSymbol, decimals } = useTokenInfo(tokenAddress);
   const contractBalance = useContractTokenBalance(tokenAddress);
 
-  const isLoading = sameLoading || individualLoading;
+  // ENS resolution for recipients
+  const parsedRecipients = parseRecipients(recipients);
+  const { resolvedMap, isLoading: isResolvingENS, allResolved } = useMultipleENSResolution(parsedRecipients);
+
+  const isLoading = sameLoading || individualLoading || isResolvingENS;
   const isSuccess = sameSuccess || individualSuccess;
   const error = sameError || individualError;
 
@@ -72,21 +79,28 @@ export function AirdropForm({ userAddress }: AirdropFormProps) {
     setIsValidating(true);
 
     try {
-      const parsedRecipients = parseRecipients(recipients);
+      // Wait for ENS resolution if needed
+      if (!allResolved) {
+        setErrors({ recipients: 'Please wait for ENS resolution to complete' });
+        return;
+      }
+
+      // Convert all inputs to resolved addresses
+      const resolvedRecipients = parsedRecipients.map(input => resolvedMap.get(input) || input);
       
       if (airdropType === 'same') {
         if (!sameAmount || !isValidAmount(sameAmount)) {
           setErrors({ sameAmount: 'Invalid amount' });
           return;
         }
-        executeSameAmount(tokenAddress, parsedRecipients, sameAmount, decimals);
+        executeSameAmount(tokenAddress, resolvedRecipients, sameAmount, decimals);
       } else {
         const parsedAmounts = parseAmounts(amounts);
-        if (parsedAmounts.length !== parsedRecipients.length) {
+        if (parsedAmounts.length !== resolvedRecipients.length) {
           setErrors({ amounts: 'Number of amounts must match number of recipients' });
           return;
         }
-        executeIndividual(tokenAddress, parsedRecipients, parsedAmounts, decimals);
+        executeIndividual(tokenAddress, resolvedRecipients, parsedAmounts, decimals);
       }
     } catch (err) {
       console.error('Airdrop error:', err);
@@ -110,7 +124,6 @@ export function AirdropForm({ userAddress }: AirdropFormProps) {
     setShowCSVUpload(false);
   };
 
-  const parsedRecipients = parseRecipients(recipients);
   const parsedAmounts = parseAmounts(amounts);
   const totalRecipients = parsedRecipients.length;
   const totalAmount = airdropType === 'same' 
@@ -130,13 +143,13 @@ export function AirdropForm({ userAddress }: AirdropFormProps) {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Token Address */}
           <div className="space-y-2">
-            <Input
+            <ENSAddressInput
               label="Token Contract Address"
               value={tokenAddress}
-              onChange={(e) => setTokenAddress(e.target.value)}
-              placeholder="0x..."
+              onChange={setTokenAddress}
+              placeholder="0x... or token.eth"
               error={errors.tokenAddress}
-              helperText="Enter the ERC20 token contract address"
+              helperText="Enter the ERC20 token contract address or ENS name"
             />
             
             {tokenAddress && tokenName && (
@@ -218,7 +231,7 @@ export function AirdropForm({ userAddress }: AirdropFormProps) {
                 onChange={(e) => setRecipients(e.target.value)}
                 placeholder="0x1234...&#10;0x5678...&#10;0x9abc..."
                 error={errors.recipients}
-                helperText="Enter one address per line"
+                helperText="Enter one address per line (ENS names will be resolved automatically)"
               />
             )}
           </div>
@@ -244,6 +257,27 @@ export function AirdropForm({ userAddress }: AirdropFormProps) {
               error={errors.amounts}
               helperText="Enter one amount per line (must match number of recipients)"
             />
+          )}
+
+          {/* Recipients Preview */}
+          {totalRecipients > 0 && (
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Recipients ({totalRecipients})
+              </h4>
+              <div className="max-h-32 overflow-y-auto">
+                <RecipientsList 
+                  addresses={parsedRecipients.slice(0, 10)} 
+                  showAvatars={true}
+                />
+                {parsedRecipients.length > 10 && (
+                  <p className="text-sm text-gray-500 mt-2">
+                    ... and {parsedRecipients.length - 10} more
+                  </p>
+                )}
+              </div>
+            </div>
           )}
 
           {/* Summary */}
@@ -300,10 +334,11 @@ export function AirdropForm({ userAddress }: AirdropFormProps) {
               (airdropType === 'same' ? !sameAmount : !amounts) ||
               Object.keys(errors).length > 0 ||
               totalRecipients === 0 ||
-              totalAmount === 0
+              totalAmount === 0 ||
+              !allResolved
             }
           >
-            {isLoading ? 'Processing...' : `Execute Airdrop (${totalRecipients} recipients)`}
+            {isResolvingENS ? 'Resolving ENS...' : isLoading ? 'Processing...' : `Execute Airdrop (${totalRecipients} recipients)`}
           </Button>
         </form>
       </CardContent>

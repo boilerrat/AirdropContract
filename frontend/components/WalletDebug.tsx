@@ -2,10 +2,12 @@
 
 import React from 'react';
 import { useAccount, useDisconnect } from 'wagmi';
+import { useENS } from '@/hooks/useENS';
 
 export function WalletDebug() {
   const { address, isConnected, status } = useAccount();
   const { disconnect } = useDisconnect();
+  const { ensName, ensAvatar, hasENS, isLoading } = useENS();
 
   const handleForceDisconnect = () => {
     try {
@@ -28,6 +30,8 @@ export function WalletDebug() {
         <p><strong>Status:</strong> {status}</p>
         <p><strong>Connected:</strong> {isConnected ? 'Yes' : 'No'}</p>
         <p><strong>Address:</strong> {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'None'}</p>
+        <p><strong>ENS Name:</strong> {isLoading ? 'Loading...' : hasENS ? ensName : 'None'}</p>
+        <p><strong>ENS Avatar:</strong> {ensAvatar ? 'Yes' : 'No'}</p>
         <p><strong>Project ID:</strong> {process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ? 'Set' : 'Missing'}</p>
         <p><strong>Environment:</strong> {process.env.NODE_ENV}</p>
       </div>
