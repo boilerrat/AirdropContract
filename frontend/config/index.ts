@@ -11,7 +11,11 @@ if (!projectId) {
 export const networks = [base];
 
 export const wagmiAdapter = new WagmiAdapter({
-  storage: createStorage({ storage: cookieStorage }),
+  storage: createStorage({ 
+    storage: cookieStorage,
+    // Add additional storage options for better compatibility
+    key: 'wagmi.cache',
+  }),
   ssr: true,
   projectId,
   networks,

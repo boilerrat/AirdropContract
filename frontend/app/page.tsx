@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useAccount } from 'wagmi';
+import { useAccount, useDisconnect } from 'wagmi';
 import { AirdropForm } from '@/components/AirdropForm';
 import { ContractStatus } from '@/components/ContractStatus';
 import { Button } from '@/components/ui/Button';
+import { WalletDebug } from '@/components/WalletDebug';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { formatAddress } from '@/lib/utils';
 import { 
@@ -17,10 +18,41 @@ import {
 } from 'lucide-react';
 
 console.log('WalletConnect Project ID:', process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID);
+console.log('Environment:', process.env.NODE_ENV);
+console.log('Current URL:', typeof window !== 'undefined' ? window.location.href : 'SSR');
 
 export default function HomePage() {
   const { address, isConnected } = useAccount();
+  const { disconnect } = useDisconnect();
   const [activeTab, setActiveTab] = useState<'airdrop' | 'status'>('airdrop');
+
+  const handleDisconnect = () => {
+    try {
+      console.log('Disconnecting wallet...');
+      console.log('Current connection state:', { isConnected, address });
+      
+      // Try to disconnect
+      disconnect();
+      
+      // Add a small delay to check if disconnect worked
+      setTimeout(() => {
+        console.log('Disconnect completed');
+      }, 1000);
+    } catch (error) {
+      console.error('Error disconnecting wallet:', error);
+      // Try alternative disconnect method
+      try {
+        if (typeof window !== 'undefined' && window.ethereum) {
+          // Force disconnect by clearing local storage
+          localStorage.removeItem('wagmi.cache');
+          localStorage.removeItem('wagmi.wallet');
+          window.location.reload();
+        }
+      } catch (fallbackError) {
+        console.error('Fallback disconnect failed:', fallbackError);
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -40,11 +72,21 @@ export default function HomePage() {
             
             <div className="flex items-center gap-3">
               {isConnected ? (
-                <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg">
-                  <Wallet className="h-4 w-4 text-gray-600" />
-                  <span className="text-sm font-mono text-gray-700">
-                    {formatAddress(address || '', 6)}
-                  </span>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg">
+                    <Wallet className="h-4 w-4 text-gray-600" />
+                    <span className="text-sm font-mono text-gray-700">
+                      {formatAddress(address || '', 6)}
+                    </span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleDisconnect}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    Disconnect
+                  </Button>
                 </div>
               ) : (
                 <w3m-button />
@@ -181,6 +223,9 @@ export default function HomePage() {
           </p>
         </footer>
       </main>
+      
+      {/* Debug component - remove this in production */}
+      {process.env.NODE_ENV === 'development' && <WalletDebug />}
     </div>
   );
 } 
