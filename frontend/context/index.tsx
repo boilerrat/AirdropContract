@@ -18,7 +18,7 @@ const metadata = {
   name: 'Airdrop Manager',
   description: 'Manage token airdrops on Base mainnet with ease',
   url: 'https://yourdomain.com', // <-- update to your production domain
-  icons: ['https://yourdomain.com/icon.png'],
+  icons: ['https://yourdomain.com/icon.svg'],
 };
 
 // Initialize AppKit

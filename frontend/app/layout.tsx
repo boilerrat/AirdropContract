@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   title: 'Airdrop Manager - Farcaster Mini App',
   description: 'Manage token airdrops on Base mainnet with ease',
   icons: {
-    icon: '/icon.png',
+    icon: '/icon.svg',
   },
 };
 
@@ -19,7 +19,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const headersObj = headers();
+  const headersObj = await headers();
   const cookies = headersObj.get('cookie') || null;
 
   return (

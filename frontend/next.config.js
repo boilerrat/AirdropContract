@@ -1,8 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Disable webpack optimizations that might cause issues
-  swcMinify: false,
-  
   // Handle externals
   webpack: (config) => {
     config.externals = config.externals || [];

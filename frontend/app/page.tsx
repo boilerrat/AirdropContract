@@ -16,6 +16,8 @@ import {
   ExternalLink 
 } from 'lucide-react';
 
+console.log('WalletConnect Project ID:', process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID);
+
 export default function HomePage() {
   const { address, isConnected } = useAccount();
   const [activeTab, setActiveTab] = useState<'airdrop' | 'status'>('airdrop');

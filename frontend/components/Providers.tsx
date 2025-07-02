@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WagmiProvider, createConfig, http } from 'wagmi';
 import { base } from 'wagmi/chains';
 import { injected, walletConnect } from 'wagmi/connectors';
+import { useAccount, useDisconnect } from 'wagmi';
 
 // Create wagmi config
 const config = createConfig({
@@ -34,10 +35,22 @@ interface ProvidersProps {
 }
 
 export function Providers({ children }: ProvidersProps) {
+  const { disconnect } = useDisconnect();
+  const { isConnected } = useAccount();
+
+  const handleDisconnect = () => {
+    disconnect();
+  };
+
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         {children}
+        {isConnected && (
+          <button onClick={handleDisconnect} className="disconnect-button">
+            Disconnect Wallet
+          </button>
+        )}
       </QueryClientProvider>
     </WagmiProvider>
   );
