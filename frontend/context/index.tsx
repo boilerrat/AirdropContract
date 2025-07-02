@@ -30,11 +30,6 @@ createAppKit({
   metadata: metadata,
   features: {
     analytics: true // Optional - defaults to your Cloud configuration
-  },
-  // Add additional configuration for better compatibility
-  options: {
-    enableAnalytics: true,
-    enableExplorer: true,
   }
 });
 
