@@ -38,11 +38,13 @@ export function ENSAddressInput({
   // Resolve ENS name to address
   const { data: ensAddress, isLoading: isLoadingAddress } = useEnsAddress({
     name: inputType === 'ens' ? inputValue : undefined,
+    chainId: 1,
   });
 
   // Resolve address to ENS name
   const { data: ensName, isLoading: isLoadingName } = useEnsName({
     address: inputType === 'address' ? inputValue as `0x${string}` : undefined,
+    chainId: 1,
   });
 
   // Handle resolution updates

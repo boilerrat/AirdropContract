@@ -7,6 +7,7 @@ import { isValidAddress, isValidENSName } from '@/lib/utils';
 export function useENSResolution(input: string) {
   const { data: resolvedAddress, isLoading, error } = useEnsAddress({
     name: isValidENSName(input) ? input : undefined,
+    chainId: 1, // Force ENS lookup on Ethereum Mainnet
   });
 
   return {

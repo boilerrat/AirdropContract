@@ -8,10 +8,12 @@ export function useENS() {
   
   const { data: ensName, isLoading: isLoadingName } = useEnsName({
     address: address as `0x${string}`,
+    chainId: 1,
   });
 
   const { data: ensAvatar, isLoading: isLoadingAvatar } = useEnsAvatar({
     name: ensName || undefined,
+    chainId: 1,
   });
 
   return {
@@ -29,10 +31,12 @@ export function useENS() {
 export function useENSForAddress(address: string | undefined) {
   const { data: ensName, isLoading: isLoadingName } = useEnsName({
     address: address as `0x${string}`,
+    chainId: 1,
   });
 
   const { data: ensAvatar, isLoading: isLoadingAvatar } = useEnsAvatar({
     name: ensName || undefined,
+    chainId: 1,
   });
 
   return {
